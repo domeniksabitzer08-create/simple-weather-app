@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:simple_weather_app/service/weather_service.dart';
 import 'package:simple_weather_app/views/main_weather_view.dart';
 
 void main() {
@@ -14,9 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: MainWeatherView(
-        locationName: "Schönweg",
-      ),
+      home: MainWeatherView(),
     );
   }
 }

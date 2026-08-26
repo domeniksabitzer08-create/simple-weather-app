@@ -41,6 +41,8 @@ class WeatherService {
       position.longitude,
     );
     String? city = placemarks[0].locality;
+    // if the locatlity is null take the sublocality
+    city ??= placemarks[0].subLocality;
     if (city != null) {
       city = fromatLocationName(city);
       return city;

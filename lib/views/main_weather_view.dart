@@ -1,15 +1,16 @@
 import 'dart:async';
+import 'dart:developer' show log;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
+import 'package:simple_weather_app/constants/weather_animations_cases.dart';
 import 'package:simple_weather_app/models/weather_model.dart';
 import 'package:simple_weather_app/service/weather_service.dart';
 import 'package:simple_weather_app/views/loading_view.dart';
 
 class MainWeatherView extends StatefulWidget {
-  final String _locationName;
-
-  const MainWeatherView({super.key, required this._locationName});
+  const MainWeatherView({super.key});
 
   @override
   State<MainWeatherView> createState() => _MainWeatherViewState();
@@ -25,16 +26,27 @@ class _MainWeatherViewState extends State<MainWeatherView> {
   // for updating the weather
   late Timer _timer;
 
-  _fetchCurrentWeather() async {
-    print("fetch weather was called");
+  void _fetchCurrentWeather() async {
     // get current location
     String location = await _weatherService.getCurrentLocation();
     // get weather
     _weather = await _weatherService.getWeather(location);
-    print("Weather was updated: $_weather");
     setState(() {
       _weather = _weather;
     });
+  }
+
+  String getWeatherAnimation(String weather) {
+    weather = weather.toLowerCase();
+    if (sunnyWeatherNames.contains(weather)) return sunnyAnimationPath;
+    if (rainyWeatherNames.contains(weather)) return rainyAnimationPath;
+    if (cloudyWeatherNames.contains(weather)) return cloudyAnimationPath;
+    if (stormWeatherNames.contains(weather))
+      return stormAnimationPath;
+    else {
+      log("No animation for this weather: $weather | using sunny");
+      return sunnyAnimationPath;
+    }
   }
 
   @override
@@ -60,10 +72,7 @@ class _MainWeatherViewState extends State<MainWeatherView> {
                 flex: 10,
                 child: Align(
                   alignment: AlignmentGeometry.center,
-                  child: AppText(
-                    text: weather ?? "Look outside",
-                    size: 50,
-                  ),
+                  child: Lottie.asset(getWeatherAnimation(weather!)),
                 ),
               ),
               Expanded(
