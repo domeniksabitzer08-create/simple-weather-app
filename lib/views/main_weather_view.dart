@@ -4,6 +4,7 @@ import 'dart:developer' show log;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+import 'package:simple_weather_app/constants/design.dart';
 import 'package:simple_weather_app/constants/weather_animations_cases.dart';
 import 'package:simple_weather_app/models/weather_model.dart';
 import 'package:simple_weather_app/service/weather_service.dart';
@@ -41,9 +42,9 @@ class _MainWeatherViewState extends State<MainWeatherView> {
     if (sunnyWeatherNames.contains(weather)) return sunnyAnimationPath;
     if (rainyWeatherNames.contains(weather)) return rainyAnimationPath;
     if (cloudyWeatherNames.contains(weather)) return cloudyAnimationPath;
-    if (stormWeatherNames.contains(weather))
+    if (stormWeatherNames.contains(weather)) {
       return stormAnimationPath;
-    else {
+    } else {
       log("No animation for this weather: $weather | using sunny");
       return sunnyAnimationPath;
     }
@@ -58,6 +59,7 @@ class _MainWeatherViewState extends State<MainWeatherView> {
       return LoadingView();
     }
     return Scaffold(
+      backgroundColor: backgroundColorDarkMode,
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 115, horizontal: 10),
         child: Center(
@@ -106,8 +108,9 @@ class _MainWeatherViewState extends State<MainWeatherView> {
 class AppText extends StatelessWidget {
   final String _text;
   final double? _size;
+  final Color? _fontColor;
 
-  const AppText({super.key, required this._text, this._size});
+  const AppText({super.key, required this._text, this._size, this._fontColor});
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +118,7 @@ class AppText extends StatelessWidget {
       _text,
       style: TextStyle(
         fontSize: _size,
+        color: _fontColor ?? fontColorDarkMode,
       ),
     );
   }

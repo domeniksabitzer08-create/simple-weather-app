@@ -1,14 +1,18 @@
 import 'dart:convert';
+import 'dart:core';
 import 'dart:developer' show log;
-import 'dart:ffi';
+import 'dart:io';
 
 import 'package:geolocator/geolocator.dart';
+import 'package:simple_weather_app/models/city_model.dart';
 import 'package:simple_weather_app/models/weather_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:geocoding/geocoding.dart';
 
 class WeatherService {
   static const BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
+  static const BASE_URL_CITIES = "http://api.openweathermap.org/geo/1.0/direct";
+  static const LIMIT_AUTOCOMPLETION = 5;
   final String apiKey;
   final Geocoding _geocoding = Geocoding();
 
@@ -66,5 +70,27 @@ class WeatherService {
     }
     log("formatted location name: $newName");
     return newName;
+  }
+
+  Future<List<City>> getCities(String search) async {
+    final request = Uri.parse(
+      "$BASE_URL_CITIES?q=$search&limit=$LIMIT_AUTOCOMPLETION&appid=$apiKey",
+    );
+    final response = await http.get(request);
+    if (response.statusCode == 200) {
+      final List<dynamic> json = jsonDecode(response.body);
+      final List<City> cities = [];
+      for (int i = 0; i < json.length; i++) {
+        cities.add(City.fromJson(json[i]));
+      }
+      return cities;
+    }
+    return [
+      City(
+        name: "No city found",
+        state: "No city found",
+        country: "No city found",
+      ),
+    ];
   }
 }

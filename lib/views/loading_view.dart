@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:lottie/lottie.dart';
 import 'package:simple_weather_app/views/main_weather_view.dart';
 
 class LoadingView extends StatelessWidget {

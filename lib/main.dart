@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simple_weather_app/views/main_weather_view.dart';
+import 'package:simple_weather_app/views/search_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: MainWeatherView(),
+      home: SearchView(),
     );
   }
 }

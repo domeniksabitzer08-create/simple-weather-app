@@ -15,6 +15,6 @@ const List<String> stormWeatherNames = ["thunderstorm"];
 const List<String> sunnyWeatherNames = ["clear"];
 
 const sunnyAnimationPath = "assets/sunny.json";
-const rainyAnimationPath = "assets/rainy.json";
+const rainyAnimationPath = "assets/rain.json";
 const cloudyAnimationPath = "assets/clouds.json";
 const stormAnimationPath = "assets/storm.json";
