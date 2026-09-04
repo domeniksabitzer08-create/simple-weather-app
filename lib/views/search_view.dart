@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'dart:developer' show log;
+
 import 'package:flutter/material.dart';
 import 'package:simple_weather_app/models/city_model.dart';
+import 'package:simple_weather_app/service/location_service.dart';
 import 'package:simple_weather_app/service/weather_service.dart';
 import 'package:simple_weather_app/views/main_weather_view.dart';
 
@@ -11,21 +15,29 @@ class SearchView extends StatefulWidget {
 }
 
 class _SearchViewState extends State<SearchView> {
-  final WeatherService _weatherService = WeatherService(
-    apiKey: "379b9339779c3d7ff6bac58ad5b0504b",
-  );
+  final LocationService _locationService = LocationService();
 
-  void _fetchCities() async {
-    final newCities = await _weatherService.getCities("Wolfsberg");
-    setState(() {
-      cities = newCities;
-    });
+  void _fetchCities(String value) async {
+    log("Make call value: $value");
+    final newCities = await _locationService.getCities(value);
+    log("These cities were found: $newCities");
+    if (mounted) {
+      setState(() {
+        cities = newCities;
+      });
+    }
   }
 
+  final _apiCallCooldown = 2;
+
   List<City> cities = [];
+
+  late Timer _timer;
+  bool _canMakeCall = true;
+  String _textFiedValue = "";
+
   @override
   Widget build(BuildContext context) {
-    _fetchCities();
     return Scaffold(
       body: Column(
         //mainAxisAlignment: MainAxisAlignment.center,
@@ -38,6 +50,10 @@ class _SearchViewState extends State<SearchView> {
               top: 50,
             ),
             child: TextField(
+              onChanged: (value) {
+                _textFiedValue = value;
+                _canMakeCall = true;
+              },
               decoration: InputDecoration(
                 suffixIcon: Icon(Icons.search),
               ),
@@ -57,6 +73,26 @@ class _SearchViewState extends State<SearchView> {
       ),
     );
   }
+
+  @override
+  void initState() {
+    _timer = Timer.periodic(
+      Duration(seconds: _apiCallCooldown),
+      (Timer timer) {
+        if (_canMakeCall) {
+          _fetchCities(_textFiedValue);
+          _canMakeCall = false;
+        }
+      },
+    );
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
 }
 
 class LocationLabel extends StatelessWidget {
@@ -70,19 +106,22 @@ class LocationLabel extends StatelessWidget {
         vertical: 5,
         horizontal: 10,
       ),
-      child: Container(
-        height: 70,
-        width: 300,
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 130, 143, 168),
-          borderRadius: BorderRadius.circular(25),
+
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.pop(context, _city.name);
+        },
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(
+            const Color.fromARGB(255, 35, 117, 183),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              flex: 2,
+            Padding(
+              padding: const EdgeInsets.all(3.0),
               child: Align(
                 alignment: AlignmentGeometry.center,
                 child: AppText(
@@ -91,7 +130,7 @@ class LocationLabel extends StatelessWidget {
                 ),
               ),
             ),
-            Expanded(child: AppText(text: "${_city.state}, ${_city.country}")),
+            AppText(text: "${_city.state}, ${_city.country}"),
           ],
         ),
       ),

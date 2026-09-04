@@ -15,7 +15,10 @@ class LoadingView extends StatelessWidget {
             CircularProgressIndicator(),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: AppText(text: "Maybe it`s faster to look outside..."),
+              child: AppText(
+                text: "Maybe it`s faster to look outside...",
+                fontColor: Colors.black,
+              ),
             ),
           ],
         ),

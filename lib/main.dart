@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:simple_weather_app/constants/routes.dart';
+import 'package:simple_weather_app/views/loading_view.dart';
 import 'package:simple_weather_app/views/main_weather_view.dart';
 import 'package:simple_weather_app/views/search_view.dart';
 
@@ -14,7 +16,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: SearchView(),
+      home: MainWeatherView(),
+      routes: {
+        mainWeatherRoute: (context) => MainWeatherView(),
+        searchRoute: (context) => SearchView(),
+      },
     );
   }
 }

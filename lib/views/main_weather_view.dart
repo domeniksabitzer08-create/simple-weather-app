@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:simple_weather_app/constants/design.dart';
+import 'package:simple_weather_app/constants/routes.dart';
 import 'package:simple_weather_app/constants/weather_animations_cases.dart';
 import 'package:simple_weather_app/models/weather_model.dart';
 import 'package:simple_weather_app/service/weather_service.dart';
@@ -23,18 +24,25 @@ class _MainWeatherViewState extends State<MainWeatherView> {
   );
 
   Weather? _weather;
+  String _location = "";
+  bool _locationIsFound = false;
 
   // for updating the weather
   late Timer _timer;
 
   void _fetchCurrentWeather() async {
     // get current location
-    String location = await _weatherService.getCurrentLocation();
+
     // get weather
-    _weather = await _weatherService.getWeather(location);
+    _weather = await _weatherService.getWeather(_location);
     setState(() {
       _weather = _weather;
     });
+  }
+
+  Future<void> _getCurrentLocation() async {
+    _location = await _weatherService.getCurrentLocation();
+    _locationIsFound = true;
   }
 
   String getWeatherAnimation(String weather) {
@@ -55,7 +63,7 @@ class _MainWeatherViewState extends State<MainWeatherView> {
     String? location = _weather?.locationName;
     String? weather = _weather?.weather;
     double? temp = _weather?.temperature;
-    if (_weather == null) {
+    if (_weather == null || !_locationIsFound) {
       return LoadingView();
     }
     return Scaffold(
@@ -85,12 +93,21 @@ class _MainWeatherViewState extends State<MainWeatherView> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.of(context).pushNamed(searchRoute);
+          _location = result.toString();
+          _fetchCurrentWeather();
+        },
+        backgroundColor: Colors.blue,
+        child: Icon(Icons.place),
+      ),
     );
   }
 
   @override
   void initState() {
-    _fetchCurrentWeather();
+    _prepareWeather();
     _timer = Timer.periodic(
       Duration(seconds: 10),
       (timer) => _fetchCurrentWeather(),
@@ -102,6 +119,11 @@ class _MainWeatherViewState extends State<MainWeatherView> {
   void dispose() {
     _timer.cancel();
     super.dispose();
+  }
+
+  void _prepareWeather() async {
+    await _getCurrentLocation();
+    _fetchCurrentWeather();
   }
 }
 
