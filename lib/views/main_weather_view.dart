@@ -7,7 +7,9 @@ import 'package:lottie/lottie.dart';
 import 'package:simple_weather_app/constants/design.dart';
 import 'package:simple_weather_app/constants/routes.dart';
 import 'package:simple_weather_app/constants/weather_animations_cases.dart';
+import 'package:simple_weather_app/models/city_model.dart';
 import 'package:simple_weather_app/models/weather_model.dart';
+import 'package:simple_weather_app/service/location_service.dart';
 import 'package:simple_weather_app/service/weather_service.dart';
 import 'package:simple_weather_app/views/loading_view.dart';
 
@@ -22,27 +24,30 @@ class _MainWeatherViewState extends State<MainWeatherView> {
   final WeatherService _weatherService = WeatherService(
     apiKey: "379b9339779c3d7ff6bac58ad5b0504b",
   );
+  final LocationService _locationService = LocationService();
 
   Weather? _weather;
-  String _location = "";
-  bool _locationIsFound = false;
-
+  City? _city;
+  Map<String, double>? _location;
   // for updating the weather
   late Timer _timer;
 
   void _fetchCurrentWeather() async {
-    // get current location
-
     // get weather
-    _weather = await _weatherService.getWeather(_location);
+    log("get weather - location = $_location");
+    _weather = await _weatherService.getWeather(_location!);
     setState(() {
       _weather = _weather;
     });
   }
 
   Future<void> _getCurrentLocation() async {
-    _location = await _weatherService.getCurrentLocation();
-    _locationIsFound = true;
+    final newCity = await _locationService.getCurrentLocation();
+    log("new city: $newCity");
+    setState(() {
+      _city = newCity;
+      _location = newCity.coordinates;
+    });
   }
 
   String getWeatherAnimation(String weather) {
@@ -60,10 +65,10 @@ class _MainWeatherViewState extends State<MainWeatherView> {
 
   @override
   Widget build(BuildContext context) {
-    String? location = _weather?.locationName;
+    String? location = _city?.name;
     String? weather = _weather?.weather;
     double? temp = _weather?.temperature;
-    if (_weather == null || !_locationIsFound) {
+    if (_weather == null || _city == null) {
       return LoadingView();
     }
     return Scaffold(
@@ -95,8 +100,10 @@ class _MainWeatherViewState extends State<MainWeatherView> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final result = await Navigator.of(context).pushNamed(searchRoute);
-          _location = result.toString();
+          final result =
+              await Navigator.of(context).pushNamed(searchRoute) ?? _city!;
+          _city = result as City;
+          _location = _city!.coordinates;
           _fetchCurrentWeather();
         },
         backgroundColor: Colors.blue,
@@ -110,7 +117,11 @@ class _MainWeatherViewState extends State<MainWeatherView> {
     _prepareWeather();
     _timer = Timer.periodic(
       Duration(seconds: 10),
-      (timer) => _fetchCurrentWeather(),
+      (timer) {
+        if (_location != null) {
+          _fetchCurrentWeather();
+        }
+      },
     );
     super.initState();
   }
@@ -124,6 +135,15 @@ class _MainWeatherViewState extends State<MainWeatherView> {
   void _prepareWeather() async {
     await _getCurrentLocation();
     _fetchCurrentWeather();
+  }
+
+  Future<void> _getDefaultCity() async {
+    final defaultCity = await _locationService.getCity("London");
+    log("default city: $defaultCity");
+    setState(() {
+      _city = defaultCity;
+      _location = defaultCity.coordinates;
+    });
   }
 }
 

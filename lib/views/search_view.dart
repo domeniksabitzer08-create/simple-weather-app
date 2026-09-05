@@ -109,7 +109,7 @@ class LocationLabel extends StatelessWidget {
 
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pop(context, _city.name);
+          Navigator.pop(context, _city);
         },
         style: ButtonStyle(
           backgroundColor: WidgetStatePropertyAll(

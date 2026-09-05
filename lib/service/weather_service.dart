@@ -16,10 +16,12 @@ class WeatherService {
 
   WeatherService({required this.apiKey});
 
-  Future<Weather> getWeather(String locationName) async {
-    locationName = await getOpenWeatherName(locationName);
+  Future<Weather> getWeather(Map<String, double> cords) async {
+    final lat = cords["latitude"];
+    final lon = cords["longitude"];
+
     final request = Uri.parse(
-      "$BASE_URL?q=$locationName&appid=$apiKey&units=metric",
+      "$BASE_URL?lat=$lat&lon=$lon&appid=$apiKey&units=metric",
     );
     final response = await http.get(request);
     if (response.statusCode == 200) {
@@ -29,15 +31,10 @@ class WeatherService {
     }
   }
 
-  Future<String> getCurrentLocation() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    Position position = await Geolocator.getCurrentPosition();
+  Future<String> convertCoordinatesToName(Map<String, double> cords) async {
     List<Placemark> placemarks = await _geocoding.placemarkFromCoordinates(
-      position.latitude,
-      position.longitude,
+      cords["latitude"]!,
+      cords["longitude"]!,
     );
     String? city = placemarks[0].locality;
     // if the locatlity is null take the sublocality
@@ -77,7 +74,7 @@ class WeatherService {
       final name = json[0]["name"];
       return name;
     } else {
-      return "London";
+      return "";
     }
   }
 
